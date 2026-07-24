@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { cmsMetadata } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata } from "@/lib/cms/seo";
+import { SITE_URL } from "@/lib/site";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CircuitLines, CrateSchematic, DimensionLine } from "@/components/ui/DecorArt";
 import Image from "next/image";
@@ -42,6 +43,17 @@ export default async function ContactPage({
 
   return (
     <div className="relative overflow-hidden pt-6 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "اتصل بنا" : "Contact", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/contact` },
+            ])
+          ),
+        }}
+      />
       {/* Hero */}
       <section className="relative px-4 md:px-margin-desktop mb-20">
         <span aria-hidden className="material-symbols-outlined decor-icon absolute -top-4 right-10 hidden lg:block">support_agent</span>

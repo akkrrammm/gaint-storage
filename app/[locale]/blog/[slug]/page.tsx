@@ -69,14 +69,24 @@ export default async function ArticlePage({
     locale === "en" ? 'href="/en/' : 'href="/'
   );
 
+  // dateModified mirrors datePublished — per-article edit timestamps aren't
+  // tracked in the CMS, so this is the honest fallback rather than a guess.
+  const articlePublishedIso = new Date(article.date).toISOString();
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: article.h1,
     description: article.description,
     image: article.heroImg,
-    datePublished: new Date(article.date).toISOString(),
+    datePublished: articlePublishedIso,
+    dateModified: articlePublishedIso,
     url: pageUrl,
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+    author: {
+      "@type": "Organization",
+      name: "Giant Storage Integrated Solutions",
+      url: SITE_URL,
+    },
     publisher: {
       "@type": "Organization",
       name: "Giant Storage Integrated Solutions",

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { cmsMetadata } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata } from "@/lib/cms/seo";
+import { SITE_URL } from "@/lib/site";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { RackOutline, CircuitLines } from "@/components/ui/DecorArt";
 import Image from "next/image";
@@ -58,6 +59,17 @@ export default async function BlogPage({
   return (
     <div className="page-blog">
       <RevealObserver />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "المدونة" : "Blog", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/blog` },
+            ])
+          ),
+        }}
+      />
 
       {/* ═══ HERO ═══ */}
       <section className="relative min-h-[620px] flex items-center overflow-hidden">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { cmsMetadata } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata } from "@/lib/cms/seo";
+import { SITE_URL } from "@/lib/site";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PalletBlueprint, DimensionLine } from "@/components/ui/DecorArt";
 import Image from "next/image";
@@ -44,6 +45,17 @@ export default async function RequestQuotePage({
 
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "اطلب عرض سعر" : "Request a Quote", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/request-quote` },
+            ])
+          ),
+        }}
+      />
       {/* Hero */}
       <section className="relative pt-16 pb-8 px-margin-mobile md:px-margin-tablet lg:px-margin-desktop max-w-container-max-width mx-auto">
         <span aria-hidden className="material-symbols-outlined decor-icon absolute top-6 right-10 hidden lg:block">request_quote</span>

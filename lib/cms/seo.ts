@@ -1,5 +1,6 @@
 import "server-only";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { getArticles, getArticleSlugs } from "@/lib/articles-data";
 import { getProductsBase } from "@/lib/products-data";
 import { SITE_URL } from "@/lib/site";
@@ -8,6 +9,10 @@ import { messagesFromDb } from "./translations-storage";
 import { readCms } from "./storage";
 import { findRedirect } from "./redirects";
 import type { Locale, OrgSchema, PageSeo, SeoFields } from "./types";
+
+/** og:locale value per site locale (Meta/Facebook's expected BCP-47-ish format). */
+const OG_LOCALE: Record<Locale, string> = { ar: "ar_EG", en: "en_US" };
+const OTHER_LOCALE: Record<Locale, Locale> = { ar: "en", en: "ar" };
 
 /* ─────────────────────────── Page registry ───────────────────────────
  * Every public surface gets a stable pageKey. Static routes keep their
@@ -166,6 +171,13 @@ export async function cmsMetadata(pageKey: string, locale: Locale, pathOverride?
     ? [seo.ogImage.startsWith("http") ? seo.ogImage : `${SITE_URL}${seo.ogImage}`]
     : undefined;
 
+  // Page-level openGraph replaces (not merges with) the layout's, so
+  // siteName/locale/alternateLocale must be repeated here on every page —
+  // otherwise they silently disappear from every route except whichever
+  // one doesn't define its own openGraph.
+  const t = await getTranslations({ locale, namespace: "meta" });
+  const siteName = t("siteName");
+
   return {
     title: seo.metaTitle,
     description: seo.metaDescription,
@@ -180,6 +192,10 @@ export async function cmsMetadata(pageKey: string, locale: Locale, pathOverride?
     openGraph: {
       title: seo.metaTitle,
       description: seo.metaDescription,
+      siteName,
+      type: "website",
+      locale: OG_LOCALE[locale],
+      alternateLocale: OG_LOCALE[OTHER_LOCALE[locale]],
       ...(og ? { images: og } : {}),
     },
   };
@@ -227,6 +243,32 @@ export async function organizationJsonLd() {
   };
 }
 
+/** LocalBusiness JSON-LD — supplemental to Organization (not a replacement):
+ *  Google allows a page to describe an entity as both when it's true, and
+ *  this business has a real physical office, so it's eligible for local
+ *  search/map surfaces that Organization alone doesn't target. Opening
+ *  hours are deliberately omitted rather than guessed — the CMS doesn't
+ *  track them yet. */
+export async function localBusinessJsonLd() {
+  const org = await orgSettings();
+  return {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: org.companyName,
+    url: org.website,
+    image: org.logoUrl,
+    email: org.email,
+    telephone: org.phone,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: org.address.street,
+      addressLocality: org.address.city,
+      addressCountry: org.address.country,
+    },
+    sameAs: Object.values(org.social).filter(Boolean),
+  };
+}
+
 export function breadcrumbJsonLd(items: { name: string; url: string }[]) {
   return {
     "@context": "https://schema.org",
@@ -258,6 +300,36 @@ export function galleryImageJsonLd(locale: Locale, images: { src: string; alt: s
       contentUrl: img.src.startsWith("http") ? img.src : `${SITE_URL}${img.src}`,
       name: img.caption,
       description: img.alt,
+    })),
+  };
+}
+
+/** VideoObject JSON-LD for the gallery's video list. uploadDate is
+ *  deliberately omitted — the CMS doesn't track per-video publish dates,
+ *  and Google's own guidance is that a fabricated date is worse than an
+ *  absent one (it can get the rich result invalidated on re-crawl). Add a
+ *  real date here once gallery_videos gains that column. */
+export function videoJsonLd(
+  locale: Locale,
+  videos: { title: string; desc: string; thumb: string; type: "youtube" | "mp4"; youtubeId?: string; src?: string }[]
+) {
+  const abs = (url: string) => (url.startsWith("http") ? url : `${SITE_URL}${url}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: videos.map((v, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "VideoObject",
+        name: v.title,
+        description: v.desc || v.title,
+        thumbnailUrl: abs(v.thumb),
+        ...(v.type === "youtube" && v.youtubeId
+          ? { embedUrl: `https://www.youtube.com/embed/${v.youtubeId}` }
+          : {}),
+        ...(v.type === "mp4" && v.src ? { contentUrl: abs(v.src) } : {}),
+      },
     })),
   };
 }

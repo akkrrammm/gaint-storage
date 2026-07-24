@@ -10,7 +10,7 @@ import Footer from "@/components/layout/Footer";
 import FloatingContactWidget from "@/components/ui/FloatingContactWidget";
 import { routing } from "@/i18n/routing";
 import { SITE_URL, FAVICON_VERSION } from "@/lib/site";
-import { faviconLinks, organizationJsonLd } from "@/lib/cms/seo";
+import { faviconLinks, organizationJsonLd, localBusinessJsonLd } from "@/lib/cms/seo";
 import { siteImage } from "@/lib/cms/images-data";
 import { LOGO_SRC_DEFAULT } from "@/lib/nav";
 import { GOOGLE_ADS_ID } from "@/lib/googleAds";
@@ -98,6 +98,7 @@ export async function generateMetadata({
       siteName: t("siteName"),
       type: "website",
       locale: locale === "ar" ? "ar_EG" : "en_US",
+      alternateLocale: locale === "ar" ? "en_US" : "ar_EG",
     },
     alternates: {
       canonical: "./",
@@ -119,6 +120,7 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const orgJsonLd = await organizationJsonLd();
+  const localBusinessLd = await localBusinessJsonLd();
   const logoSrc = await siteImage("header.logo", LOGO_SRC_DEFAULT);
 
   return (
@@ -131,6 +133,10 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessLd) }}
         />
         {/* Google Ads gtag.js — loaded exactly once here, in the single
             shared public-site root layout (the /admin dashboard has its own

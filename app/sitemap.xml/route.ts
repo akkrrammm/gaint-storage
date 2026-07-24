@@ -15,6 +15,9 @@ type SitemapEntry = {
   url: string;
   lastModified: Date;
   priority: number;
+  /** Every language version, including this entry's own — each <url> is a
+   *  full peer, not just an alternate of the Arabic one, so Google can
+   *  discover and index each language directly from the sitemap itself. */
   alternates: { ar: string; en: string };
 };
 
@@ -30,14 +33,18 @@ function escapeXml(value: string): string {
 }
 
 async function buildEntries(): Promise<SitemapEntry[]> {
+  // One page produces TWO peer entries (ar + en), both carrying the same
+  // full alternate set — the previously-shipped version only ever listed
+  // the Arabic URL as a <loc>, leaving English discoverable solely via
+  // hreflang rather than as its own indexable sitemap entry.
   const entry = (arPath: string, enPath: string, priority: number, lastModified: Date) => {
     const arUrl = `${SITE_URL}${arPath === "" ? "/" : arPath}`;
-    return {
-      url: arUrl,
-      lastModified,
-      priority,
-      alternates: { ar: arUrl, en: `${SITE_URL}/en${enPath}` },
-    };
+    const enUrl = `${SITE_URL}/en${enPath}`;
+    const alternates = { ar: arUrl, en: enUrl };
+    return [
+      { url: arUrl, lastModified, priority, alternates },
+      { url: enUrl, lastModified, priority, alternates },
+    ];
   };
 
   const articles = await getArticles("en");
@@ -47,7 +54,7 @@ async function buildEntries(): Promise<SitemapEntry[]> {
       const base = page.pageKey.slice(8);
       const a = articles.find((x) => x.slug === base);
       out.push(
-        entry(
+        ...entry(
           `/blog/${await articleSlug(base, "ar")}`,
           `/blog/${await articleSlug(base, "en")}`,
           0.5,
@@ -56,7 +63,7 @@ async function buildEntries(): Promise<SitemapEntry[]> {
       );
     } else {
       const p = page.path === "/" ? "" : page.path;
-      out.push(entry(p, p, PRIORITY[page.pageKey] ?? 0.5, new Date()));
+      out.push(...entry(p, p, PRIORITY[page.pageKey] ?? 0.5, new Date()));
     }
   }
   return out;
@@ -80,6 +87,7 @@ export async function GET() {
           `<loc>${escapeXml(e.url)}</loc>\n` +
           `<xhtml:link rel="alternate" hreflang="ar" href="${escapeXml(e.alternates.ar)}" />\n` +
           `<xhtml:link rel="alternate" hreflang="en" href="${escapeXml(e.alternates.en)}" />\n` +
+          `<xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(e.alternates.ar)}" />\n` +
           `<lastmod>${e.lastModified.toISOString()}</lastmod>\n` +
           `<priority>${e.priority}</priority>\n` +
           `</url>\n`

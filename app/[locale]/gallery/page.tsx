@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { cmsMetadata, galleryImageJsonLd, galleryImageSeo } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata, galleryImageJsonLd, galleryImageSeo, videoJsonLd } from "@/lib/cms/seo";
 import { getGalleryImages, getGalleryVideos } from "@/lib/gallery-data";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import ImageGallery from "@/components/gallery/ImageGallery";
 import { RackOutline, DimensionLine } from "@/components/ui/DecorArt";
 import VideoGallery from "@/components/gallery/VideoGallery";
 import { siteImage } from "@/lib/cms/images-data";
+import { SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
   params,
@@ -52,6 +53,17 @@ export default async function GalleryPage({
   return (
     <div className="page-gallery">
       <RevealObserver />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "المعرض" : "Gallery", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/gallery` },
+            ])
+          ),
+        }}
+      />
 
       {/* ═══ HERO (same treatment as the blog/article dark heroes) ═══ */}
       <section className="relative h-[420px] md:h-[480px] overflow-hidden flex items-end">
@@ -116,6 +128,10 @@ export default async function GalleryPage({
               {t("videosDescription")}
             </p>
           </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(videoJsonLd(loc, videos)) }}
+          />
           <VideoGallery videos={videos} />
         </div>
       </section>

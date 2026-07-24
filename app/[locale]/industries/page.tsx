@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { cmsMetadata } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata } from "@/lib/cms/seo";
 import { getIndustryModals } from "@/lib/industries-data";
 import { setRequestLocale } from "next-intl/server";
 import IndustriesContent from "@/components/industries/IndustriesContent";
 import { siteImage } from "@/lib/cms/images-data";
+import { SITE_URL } from "@/lib/site";
 
 const HERO_IMG_DEFAULT =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuD9tA-rr56TAmeLUnSIaFKlqLG4WOQHKeKl--QJeyBeW4FocUP0_70tEj7xLqMSxysGDlXeHbbhUEYKgQDUx4Bobd1-tTTOPJbQ-sBlHT8xEeBEuI246As9lEE9_tN8TpHTJADF-JYWyVqKw8d_Y9FUF9rfzQdccymjHv0TkPA9KCAip3cT_w1e5ZaTtgmlFM5xlQ17smw7Xjp3FFIyb6tOk2YOJGs4PnucZmYwhk3bSsUt8q0LPvZ0eKBY8BA4-mxFCSsjFeZyefM";
@@ -30,5 +31,20 @@ export default async function IndustriesPage({
   const heroImg = await siteImage("industries.hero", HERO_IMG_DEFAULT);
   const techImg = await siteImage("industries.techHighlight", TECH_IMG_DEFAULT);
 
-  return <IndustriesContent modals={modals} heroImg={heroImg} techImg={techImg} />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "الصناعات" : "Industries", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/industries` },
+            ])
+          ),
+        }}
+      />
+      <IndustriesContent modals={modals} heroImg={heroImg} techImg={techImg} />
+    </>
+  );
 }

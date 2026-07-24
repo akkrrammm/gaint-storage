@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { cmsMetadata } from "@/lib/cms/seo";
+import { breadcrumbJsonLd, cmsMetadata } from "@/lib/cms/seo";
+import { SITE_URL } from "@/lib/site";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PalletBlueprint, DimensionLine, HexOutline } from "@/components/ui/DecorArt";
 import Image from "next/image";
@@ -60,6 +61,17 @@ export default async function AboutPage({
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              { name: locale === "ar" ? "الرئيسية" : "Home", url: `${SITE_URL}${locale === "en" ? "/en" : "/"}` },
+              { name: locale === "ar" ? "من نحن" : "About Us", url: `${SITE_URL}${locale === "en" ? "/en" : ""}/about` },
+            ])
+          ),
+        }}
+      />
       {/* Hero */}
       <section className="relative px-4 md:px-margin-desktop py-20 overflow-hidden">
         <div aria-hidden className="absolute -top-16 -right-16 w-64 h-64 dot-pattern-bg opacity-40 pointer-events-none [mask-image:radial-gradient(circle,#000_40%,transparent_80%)]" />
