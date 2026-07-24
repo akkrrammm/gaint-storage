@@ -291,7 +291,7 @@ function ProductCard({
 /* ─────────────────────── Industry modal editor ─────────────────────── */
 
 function IndustryCard({
-  id, titleEn, titleAr, image, base, record, onSave, onSaveImage,
+  id, titleEn, titleAr, image, record, onSave, onSaveImage,
 }: {
   id: string; titleEn: string; titleAr: string; image: string;
   base: { en: IndustryFields; ar: IndustryFields };
@@ -486,7 +486,7 @@ function ArticleCard({
       <div className="px-5 pb-5 border-t border-outline-variant/50 pt-4">
         <p className="text-xs text-on-surface-variant mb-3">
           Listing-page teaser text is edited under Translations → blogPage.
-          This edits the article's detail page.
+          This edits the article&apos;s detail page.
         </p>
         <div className="mb-4">
           <ImageUploader

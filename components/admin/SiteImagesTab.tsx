@@ -39,7 +39,7 @@ function VideoUploadRow({ item, value, onSaved }: { item: SiteImageKey; value: s
         {busy && <span className="text-xs text-on-surface-variant">Saving…</span>}
         {saved && <span className="text-xs text-primary font-bold">Saved ✓ — live on the site</span>}
         {failed && <span className="text-xs text-error font-bold">Save failed</span>}
-        {!url && !saved && !busy && <span className="text-xs text-on-surface-variant">no video yet — the card's play button stays inactive</span>}
+        {!url && !saved && !busy && <span className="text-xs text-on-surface-variant">no video yet — the card&apos;s play button stays inactive</span>}
       </div>
     </div>
   );

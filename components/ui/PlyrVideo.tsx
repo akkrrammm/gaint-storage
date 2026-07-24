@@ -37,7 +37,14 @@ export default function PlyrVideo({
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
+
+  // Keeps the ref current without making it a dependency of the main
+  // effect below (which would tear down and recreate the Plyr player on
+  // every identity change of onError) — a ref update belongs in an effect,
+  // not directly in the render body.
+  useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   useEffect(() => {
     const host = hostRef.current;

@@ -92,7 +92,7 @@ export default function RichTextEditor({
           className={toolbarBtnCls}
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
-          " Quote
+          &quot; Quote
         </button>
         <button
           type="button"
