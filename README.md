@@ -1,5 +1,9 @@
 # Giant Storage — Integrated Industrial Solutions
 
+[![Gaint Storage website](https://raw.githubusercontent.com/akkrrammm/akkrrammm/main/assets/gaint-storage.jpg)](https://gaintstorage.com/)
+
+🔗 **Live site:** [gaintstorage.com](https://gaintstorage.com/)
+
 Marketing site for Giant Storage Integrated Solutions, built with Next.js
 (App Router, TypeScript, Tailwind CSS v4). Migrated from a static HTML site
 (preserved in `legacy-html-reference/` during the migration).
