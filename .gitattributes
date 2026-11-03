@@ -1,0 +1,2 @@
+# Exclude the legacy static HTML reference from GitHub language stats
+legacy-html-reference/** linguist-vendored
